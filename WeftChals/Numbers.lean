@@ -18,11 +18,18 @@ abbrev plan : BlockPlan := Plans.Compression.plan
 /-- Inputs available at round 0. -/
 def zeroTimes {k : Nat} : Fin k → Wd Nat := fun _ _ => 0
 
+set_option maxRecDepth 100000 in
+/-- **The numbers, by the kernel**: 38656 ANDs, and the output ready at
+round 456.  One evaluation of the timing model (about two minutes). -/
+theorem timeModel_numbers :
+    (timeModel plan zeroTimes zeroTimes).2 = 38656 ∧ maxTime (timeModel plan zeroTimes zeroTimes).1 = 456 := by
+  decide +kernel
+
 /-- **Communication**: 38656 ANDs. -/
-theorem timeModel_comm : (timeModel plan zeroTimes zeroTimes).2 = 38656 := by decide +kernel
+theorem timeModel_comm : (timeModel plan zeroTimes zeroTimes).2 = 38656 := timeModel_numbers.1
 
 /-- **Round complexity**: the output is ready at round 456. -/
-theorem timeModel_ready : maxTime (timeModel plan zeroTimes zeroTimes).1 = 456 := by decide +kernel
+theorem timeModel_ready : maxTime (timeModel plan zeroTimes zeroTimes).1 = 456 := timeModel_numbers.2
 
 /-- The compression function on inputs available at round 0. -/
 def request (H : Fin 8 → Word32) (block : Fin 16 → Word32) : Req CompressF.ops .timed :=
