@@ -145,6 +145,24 @@ def vecM {m : Type → Type u} [Monad m] {α : Type} : (n : Nat) → (Fin n → 
     let rest ← vecM n fun i => g i.succ
     pure (consFin a rest)
 
+/-- The list of the values of a function on `Fin n`, first-to-last.  (Core's
+`List.ofFn` goes through arrays, which the certificate checker rejects.) -/
+def finList {α : Type} : (n : Nat) → (Fin n → α) → List α
+  | 0, _ => []
+  | n + 1, f => f 0 :: finList n fun i => f i.succ
+
+theorem finList_eq_ofFn {α : Type} : ∀ (n : Nat) (f : Fin n → α), finList n f = List.ofFn f
+  | 0, _ => rfl
+  | n + 1, f => by
+    rw [List.ofFn_succ]
+    simp only [finList, finList_eq_ofFn n]
+
+theorem finList_map {α β : Type} (g : α → β) : ∀ (n : Nat) (f : Fin n → α), (finList n f).map g = finList n (g ∘ f)
+  | 0, _ => rfl
+  | n + 1, f => by
+    simp only [finList, List.map_cons, finList_map g n]
+    rfl
+
 /-- A list of monadic results, first-to-last. -/
 def listM {m : Type → Type u} [Monad m] {α β : Type} (f : α → m β) : List α → m (List β)
   | [] => pure []
