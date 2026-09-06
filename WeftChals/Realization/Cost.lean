@@ -20,9 +20,15 @@ noncomputable abbrev HybT : Model Hyb.ops .timed Sched := hybOverBool2.timed Boo
 def timeModel (plan : BlockPlan) (H : Fin 8 → Wd Nat) (block : Fin 16 → Wd Nat) : Count (Fin 8 → Wd Nat) :=
   Compress.compress (m := Count) plan H block
 
-/-- When every output bit is ready. -/
-def maxTime (o : Fin 8 → Wd Nat) : Nat :=
-  (List.finRange 8).foldr (fun j m => max ((List.finRange 32).foldr (fun i m => max (o j i) m) 0) m) 0
+/-- When every output bit is ready: the latest ready time, as a structural
+fold (the kernel evaluates it; `Shape.ready` folds over `List.finRange`). -/
+def maxTime (o : Fin 8 → Wd Nat) : Nat := (finList 8 fun j => (finList 32 (o j)).foldr max 0).foldr max 0
+
+theorem foldr_finRange : ∀ (n : Nat) (g : Fin n → Nat),
+    (List.finRange n).foldr (fun i m => max (g i) m) 0 = (finList n g).foldr max 0
+  | 0, _ => rfl
+  | n + 1, g => by
+    rw [List.finRange_succ, List.foldr_cons, List.foldr_map, finList, List.foldr_cons, foldr_finRange n]
 
 /-! ## The timing laws of `Hyb`, from those of `Bool2` -/
 
@@ -92,6 +98,11 @@ end Hyb
 /-- Ready times of the inputs. -/
 def timesOf {k : Nat} (ws : Fin k → Wd (Timed GF2)) : Fin k → Wd Nat := fun j => Wd.map Timed.time (ws j)
 
+/-- Eight words are ready at `maxTime` of their ready times. -/
+theorem ready_vec8 (o : Fin 8 → Wd (Timed GF2)) : Shape.ready (.vec 8 W) o = maxTime (timesOf o) := by
+  simp only [Shape.ready, maxTime, foldr_finRange, timesOf]
+  rfl
+
 /-- The composed program's scheduled run is the timing model's. -/
 theorem compress_sched (plan : BlockPlan) (H : Fin 8 → Wd (Timed GF2)) (block : Fin 16 → Wd (Timed GF2)) :
     (fun (o : Fin 8 → Wd (Timed GF2)) => timesOf o)
@@ -123,8 +134,7 @@ theorem compress_readyOn (plan : BlockPlan) (H : Fin 8 → Wd (Timed GF2)) (bloc
     readyOn Bool2.timed (.vec 8 W) ((compressOverBool2 plan).impl .timed ⟨(), (H, block, ())⟩)
       = maxTime (timeModel plan (timesOf H) (timesOf block)).1 := by
   obtain ⟨h1, h2⟩ := compress_sched plan H block
-  simp only [readyOn, h2, Nat.max_zero]
-  rw [← h1]
-  rfl
+  simp only [readyOn, h2, Nat.max_zero, ready_vec8]
+  exact congrArg maxTime h1
 
 end WeftChals

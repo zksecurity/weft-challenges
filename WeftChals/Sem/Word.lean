@@ -79,7 +79,7 @@ theorem sum_erase3' (l : List Nat) (hi mid lo : Nat) (h1 : lo < mid) (h2 : mid <
   exact sum_erase3 l hi mid lo h1 h2 h3
 
 /-- The three positions, in whichever order, are `i`, `j`, `k`. -/
-theorem getD_perm3 (l : List Nat) (i j k : Nat) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
+theorem getD_perm3 (l : List Nat) (i j k : Nat) :
     l.getD (max i (max j k)) 0 + l.getD (i + j + k - max i (max j k) - min i (min j k)) 0 + l.getD (min i (min j k)) 0
       = l.getD i 0 + l.getD j 0 + l.getD k 0 := by
   have h6 : (max i (max j k) = i ∧ min i (min j k) = j) ∨ (max i (max j k) = i ∧ min i (min j k) = k) ∨
@@ -114,7 +114,7 @@ theorem step_S (ws : List (Word GF2)) (code : Nat) : S (Id.run (Sum32.step (m :=
         (min i (min j k))) = ((((ws.map Word.val).map Word32.toNat).eraseIdx (max i (max j k))).eraseIdx
         (i + j + k - max i (max j k) - min i (min j k)) |>.eraseIdx (min i (min j k))).sum % 2 ^ 32 := by
       simp only [S, List.eraseIdx_map]
-    rw [hS, Nat.mod_add_mod, ← getD_perm3 _ i j k hij hik hjk, ← Nat.add_assoc, ← Nat.add_assoc,
+    rw [hS, Nat.mod_add_mod, ← getD_perm3 _ i j k, ← Nat.add_assoc, ← Nat.add_assoc,
       sum_erase3' _ _ _ _ (by omega) (by omega) (by simp; omega)]
     rfl
   · rfl

@@ -50,6 +50,6 @@ noncomputable def compressOverBool2 (plan : BlockPlan) : Realization SHA256Compr
 theorem compressOverBool2_pre (plan : BlockPlan) (r : Req SHA256Compress.ops .ideal) :
     (compressOverBool2 plan).Pre r :=
   ⟨trivial, Valid.of_forall _ (fun r => by
-    obtain ⟨⟨⟨_ | _ | _ | _ | _ | _ | n, h⟩, o⟩, a⟩ := r <;> first | trivial | exact absurd h (by simp)) _⟩
+    obtain ⟨⟨⟨_ | _ | _ | _ | _ | _ | n, h⟩, o⟩, a⟩ := r <;> trivial) _⟩
 
 end WeftChals

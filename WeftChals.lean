@@ -27,3 +27,4 @@ import WeftChals.Sem.Compress
 import WeftChals.Realization.Word
 import WeftChals.Realization.Compress
 import WeftChals.Realization.Cost
+import WeftChals.Numbers

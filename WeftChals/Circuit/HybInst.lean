@@ -31,7 +31,7 @@ theorem viewRel : WordRel (Rel.ofView Hyb.eval) (fun _ : Domain.ideal.share GF2 
   pmaj _ _ _ := ⟨rfl, rfl⟩
   pcsa _ _ _ := ⟨rfl, rfl⟩
   padd _ _ _ := ⟨rfl, rfl⟩
-  psum p ws := ⟨rfl, rfl⟩
+  psum _ _ := ⟨rfl, rfl⟩
 
 end Hyb
 

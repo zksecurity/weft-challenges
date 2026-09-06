@@ -102,7 +102,7 @@ theorem shrW (w : Wd S₁) (n : Nat) : ρ.R (Wd.map f) (Compress.shrW w n) (Comp
   · exact h.pconst false
 
 theorem constW (n : Nat) : ρ.R (Wd.map f) (Compress.constW n : m₁ (Wd S₁)) (Compress.constW n) :=
-  ρ.vecM 32 fun i => h.pconst _
+  ρ.vecM 32 fun _ => h.pconst _
 
 theorem sigma0 (x : Wd S₁) : ρ.R (Wd.map f) (Compress.sigma0 x) (Compress.sigma0 (Wd.map f x)) := by
   simp only [Compress.sigma0, rotrW_map]

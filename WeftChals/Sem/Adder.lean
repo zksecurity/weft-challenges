@@ -118,7 +118,7 @@ theorem find_spec {e : Env GF2} (he : Inv x y e) {isG : Bool} {a b : Nat} {w : B
   obtain ⟨⟨⟨isG', a', b'⟩, w'⟩, hq, hw⟩ := h
   have hmem := List.mem_of_find?_eq_some hq
   have hp := List.find?_some hq
-  simp only [decide_eq_true_eq, Prod.mk.injEq] at hp
+  simp only [decide_eq_true_eq] at hp
   obtain ⟨rfl, rfl, rfl⟩ := hp
   subst hw
   exact he _ hmem
@@ -263,7 +263,7 @@ theorem prod_inv {e : Env GF2} (he : Inv x y e) (code : Nat) :
       have hphi := getP_val he (d.m + 1) d.b (by omega) hbn
       have hplo := getP_val he d.a d.m ham (by omega)
       refine Inv_cons x y he (by omega) hbn ?_
-      rw [if_neg (by simpa using ‹¬ d.isG = true›), Bit.val_and, hphi, hplo]
+      rw [if_neg Bool.false_ne_true, Bit.val_and, hphi, hplo]
       have := P_split x.val y.val (p0 + d.a) (d.m - d.a) (d.b - (d.m + 1))
       rw [show d.m - d.a + (d.b - (d.m + 1)) + 1 = d.b - d.a by omega,
         show p0 + d.a + (d.m - d.a) + 1 = p0 + (d.m + 1) by omega] at this

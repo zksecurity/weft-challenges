@@ -17,6 +17,7 @@ and perfect privacy.
 | Correctness of the gadgets and of the compression program | `WeftChals/Sem/` |
 | The realisations and the cost theorems | `WeftChals/Realization/`, `WeftChals/Numbers.lean` |
 | Known-answer tests (`native_decide`, outside the development) | `Tests/` |
+| The circuit's numbers, by the kernel | `WeftChals/Numbers.lean` |
 
 ## The functionality
 
@@ -66,16 +67,31 @@ the kernel evaluates.  One relation lemma per gadget connects them
 
 For the exported plan (`WeftChals/Numbers.lean`):
 
-* `compress_rounds`: the output of the composed program is ready at round 456.
-* `compress_comm`: it communicates 38656 units (one per AND).
-* `theCircuit_real`: the realisation equation, for every request: output
-  is `compressBlock`, view is simulated from the event alone (perfect
-  privacy); it is `Realization.comp` of the certificates checked by weft's
-  `program` command.
+* `compress_rounds`: the output of the composed program over `Bool2` is
+  ready at round 456 (`readyOn`), for inputs available at round 0.
+* `compress_comm`: it communicates 38656 units (`commOn`), one per AND.
+* `theCircuit_real`: the realisation equation, for every request: the
+  output is `compressBlock` and the view is simulated from the event
+  alone (perfect privacy).  It is `Realization.comp` of the certificates
+  checked by weft's `program` command: the five word realisations
+  (`WeftChals/Realization/Word.lean`) and the compression program over
+  the word functionalities (`WeftChals/Realization/Compress.lean`), whose
+  output is `compressBlock` by `Compress.compress_val`
+  (`WeftChals/Sem/Compress.lean`) at the ideal word operations.
 
-Both cost theorems are the timing model's numbers, decided by the kernel
-(`decide +kernel`), transported to the weft program by the relation
-lemmas and `Realizations.sched_timed`.
+Both cost theorems are the timing model's numbers (`timeModel_numbers`,
+`decide +kernel`), transported to the weft program by the relation lemmas
+and `Realizations.sched_timed`.  All of them depend on `propext`,
+`Quot.sound` and `Classical.choice` only.
+
+The kernel evaluates the timing model in about three minutes.  Three
+choices make that possible: costs are combined by a writer monad along the
+program's structure (`WeftChals/Circuit/Writer.lean`), never threaded
+through the gates; counting a gate forces its ready time (`after`,
+`WeftChals/Circuit/Instances.lean`), so the times are computed in circuit
+order rather than by a lazy read of the outputs, which nests `max` as deep
+as the circuit; and the latest output time is a structural fold
+(`maxTime`, `WeftChals/Realization/Cost.lean`).
 
 ## Building
 
@@ -84,8 +100,10 @@ lake exe cache get
 lake build
 ```
 
-`Tests` uses `native_decide`; the development does not.  Regenerate the
-plan with `python3 tools/plan_export.py` (writes
+`Tests` uses `native_decide`; the development does not.  The tests run
+the word gadgets by weft's interpreter, and the whole compression circuit
+(the gadgets on the bits' values, on the exported plan) on the padded
+block of `"abc"`.  Regenerate the plan with `python3 tools/plan_export.py` (writes
 `WeftChals/Plans/Compression.lean` and `tools/plan_compression.json`);
 `python3 tools/lean_model.py tools/plan_compression.json` re-simulates the
 plan under the Lean rules and prints the same numbers.

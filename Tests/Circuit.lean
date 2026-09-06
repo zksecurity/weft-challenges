@@ -1,15 +1,21 @@
 import WeftChals.Realization.Compress
+import WeftChals.Plans.Compression
 
 /-!
 # Known-answer tests of the circuits
 
 Evaluated by compiled code (`native_decide`), outside the certified
 development.  The Boolean word gadgets are run by weft's interpreter on
-concrete words (each a few hundred requests), and the compression program
-at the ideal word operations on the standard IV and the padded block of
-`"abc"`.  The composition of the two is weft's theorem, not a test.
-Correctness holds for every plan, so both the empty plan (fallback
-structure) and a few hand-written networks are exercised.
+concrete words (each a few hundred requests); the whole compression
+circuit (the word gadgets on the bits' values, on the exported plan and on
+the empty plan) is run in a strict data monad on the standard IV and the
+padded block of `"abc"`.  Correctness holds for every plan, so the empty
+plan (fallback structure) and a few hand-written networks are exercised
+too.
+
+The circuit is not evaluated at `Id`: the compiler eta-expands
+function-typed words there and recomputes every word per bit, which is
+exponential in the number of rounds.
 -/
 namespace WeftChals.Tests
 open Weft WeftChals
@@ -40,6 +46,8 @@ def sklansky : Net := ⟨31, Id.run do
 def ripple31 : Net := ⟨31, (List.range' 1 30).map fun k => 32768 + k * 32 + (k - 1)⟩
 def ripple30 : Net := ⟨30, (List.range' 1 29).map fun k => 32768 + k * 32 + (k - 1)⟩
 
+/-! ## The word gadgets, by weft's interpreter -/
+
 /-- Run a Boolean gadget body by weft's interpreter and read the word. -/
 def runB (p : Prog Bool2.ops .ideal Word32) : Nat := Word32.toNat (output Bool2.eval p)
 
@@ -62,6 +70,23 @@ example : runB (sumReal ⟨[], ⟨30, []⟩⟩ [w1, w2, w3, w4, w5]) =
     (0x6a09e667 + 0xbb67ae85 + 0x3c6ef372 + 0xffffffff + 0x80000001) % 2 ^ 32 := by
   native_decide
 
+/-! ## The whole circuit, on the bits' values -/
+
+instance : LinM Option GF2 where
+  bxor a b := some (a + b)
+  bconst b := some (GF2.ofBool b)
+
+instance : BitM Option GF2 where
+  band a b := some (a * b)
+
+/-- The word operations by their Boolean gadgets: the compression circuit. -/
+instance : WordM Option GF2 where
+  ch := chReal
+  maj := majReal
+  csa := csaReal
+  add := addReal
+  sum := sumReal
+
 def iv : Fin 8 → Word32 := wordsBits Specs.SHA256.H0
 
 /-- The padded block of `"abc"`. -/
@@ -71,9 +96,12 @@ def abcBlock : Fin 16 → Word32 := fun j =>
 def abcDigest : Vector Nat 8 :=
   #v[0xba7816bf, 0x8f01cfea, 0x414140de, 0x5dae2223, 0xb00361a3, 0x96177a9c, 0xb410ff61, 0xf20015ad]
 
-def emptyPlan : BlockPlan := ⟨[], [], []⟩
+/-- The exported circuit computes `sha256("abc")`. -/
+example : (Compress.compress (m := Option) Plans.Compression.plan iv abcBlock).map wordsNat = some abcDigest := by
+  native_decide
 
-/-- The compression program at the ideal word operations, on the empty plan. -/
-example : wordsNat (Id.run (Compress.compress (m := Id) emptyPlan iv abcBlock)) = abcDigest := by native_decide
+/-- So does the fallback structure of the empty plan. -/
+example : (Compress.compress (m := Option) ⟨[], [], []⟩ iv abcBlock).map wordsNat = some abcDigest := by
+  native_decide
 
 end WeftChals.Tests

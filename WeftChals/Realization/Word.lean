@@ -41,7 +41,7 @@ theorem real_of_output_view {fs : Hybrid} (hfs : fs.model = fs.eval.lift PMF) {F
   rw [hfs, dist_lift, hF, Model.lift_step, hout]
   simp only [PMF.monad_bind_eq_bind, PMF.monad_pure_eq_pure, PMF.pure_bind]
   rw [hview]
-  simp [PMF.monad_bind_eq_bind, PMF.monad_pure_eq_pure, PMF.pure_bind]
+  simp [PMF.monad_pure_eq_pure, PMF.pure_bind]
 
 /-! ## Outputs and views of the bodies, from the relation lemmas -/
 

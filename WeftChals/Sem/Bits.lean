@@ -123,10 +123,6 @@ theorem toNat_maj (x y z : Word32) : toNat (maj x y z) = Specs.SHA256.Maj (toNat
   simp only [Specs.SHA256.Maj, Nat.testBit_xor, Nat.testBit_and, maj, testBit_toNat']
   by_cases h : i < 32
   · simp only [h, dite_true, GF2.toBool_add, GF2.toBool_mul]
-    try (generalize GF2.toBool (x ⟨i, h⟩) = a
-         generalize GF2.toBool (y ⟨i, h⟩) = b
-         generalize GF2.toBool (z ⟨i, h⟩) = c
-         cases a <;> cases b <;> cases c <;> rfl)
   · simp [h]
 
 theorem rotRight32_lt (X n : Nat) (hX : X < 2 ^ 32) : rotRight32 X n < 2 ^ 32 := by

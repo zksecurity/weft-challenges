@@ -36,8 +36,18 @@ instance timeLinM : LinM Count Nat where
   bxor a b := (max a b, 0)
   bconst _ := (0, 0)
 
+/-- `after t n` is `n`, once `t` is a numeral.  The counting instance
+charges a gate `after t 1` with `t` the gate's ready time, so that the
+kernel computes the ready time of every gate when it counts the gate, in
+circuit order; the ready times of the outputs are then numerals already.
+(Read lazily, an output time is a nesting of `max` as deep as the
+circuit, which overflows the kernel's stack.) -/
+def after (t n : Nat) : Nat := match t with | 0 => n | _ + 1 => n
+
+@[simp] theorem after_eq (t n : Nat) : after t n = n := by cases t <;> rfl
+
 instance timeBitM : BitM Count Nat where
-  band a b := (max a b + 1, 1)
+  band a b := (max a b + 1, after (max a b + 1) 1)
 
 instance viewLinM : LinM (Log (Event Bool2.ops)) Unit where
   bxor _ _ := ((), [⟨Bool2.lin .add, ((), (), ()), (), ()⟩])
@@ -126,8 +136,8 @@ theorem timeRel : BitRel (Rel.ofTimed Bool2.timed) (fun x : Domain.timed.share G
     refine ⟨?_, ?_⟩
     · show max (max a.time (max b.time 0)) s.clock + 1 = max a.time b.time + 1
       rw [hs]; omega
-    · show ({ s with comm := s.comm + 1 } : Clock) = ⟨0, s.comm + 1⟩
-      cases s; simp_all
+    · show ({ s with comm := s.comm + 1 } : Clock) = ⟨0, s.comm + after (max a.time b.time + 1) 1⟩
+      rw [after_eq]; cases s; simp_all
   pconst b s hs := by
     refine ⟨?_, ?_⟩
     · show max (max 0 0) s.clock + 0 = 0
