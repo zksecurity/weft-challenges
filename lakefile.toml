@@ -1,0 +1,12 @@
+name = "weft-chals"
+defaultTargets = ["WeftChals"]
+
+[leanOptions]
+autoImplicit = false
+
+[[require]]
+name = "weft"
+path = "../weft"
+
+[[lean_lib]]
+name = "WeftChals"
