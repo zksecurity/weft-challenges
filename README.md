@@ -100,6 +100,14 @@ lake exe cache get
 lake build
 ```
 
+GitHub Actions builds `WeftChals` and `Tests` on pushes and pull requests.
+The workflow checks out `zksecurity/weft` beside this project, matching
+the `../weft` dependency in `lakefile.toml`, and tracks its `master` branch.
+Changes to the dependency must be pushed to `weft` before CI can use them.
+Since `weft` is private, set the `WEFT_READ_TOKEN` Actions secret to a
+token with read access to that repository's contents. Pull requests from
+forks cannot run this build without access to the dependency.
+
 `Tests` uses `native_decide`; the development does not.  The tests run
 the word gadgets by weft's interpreter, and the whole compression circuit
 (the gadgets on the bits' values, on the exported plan) on the padded

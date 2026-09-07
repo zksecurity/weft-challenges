@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out the project
+        uses: actions/checkout@v4
+        with:
+          path: weft-challenges
+          persist-credentials: false
+
+      - name: Check out weft
+        uses: actions/checkout@v4
+        with:
+          repository: zksecurity/weft
+          ref: master
+          path: weft
+          token: ${{ secrets.WEFT_READ_TOKEN }}
+          persist-credentials: false
+
+      - name: Build the proofs and known-answer tests
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: weft-challenges
+          auto-config: 'false'
+          build: 'true'
+          build-args: WeftChals Tests
+          use-mathlib-cache: 'true'
