@@ -30,7 +30,6 @@ jobs:
           repository: zksecurity/weft
           ref: master
           path: weft
-          token: ${{ secrets.WEFT_READ_TOKEN }}
           persist-credentials: false
 
       - name: Build the proofs and known-answer tests
