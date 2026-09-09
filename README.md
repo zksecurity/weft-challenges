@@ -79,21 +79,31 @@ For the exported plan (`WeftChals/Numbers.lean`):
   output is `compressBlock` by `Compress.compress_val`
   (`WeftChals/Sem/Compress.lean`) at the ideal word operations.
 
-Both cost theorems are the timing model's numbers (`timeModel_numbers`,
-`decide +kernel`), transported to the weft program by the relation lemmas
+Both cost theorems are the timing model's numbers (`timeModel_numbers`),
+transported to the weft program by the relation lemmas
 and `Realizations.sched_timed`.  All of them depend on `propext`,
 `Quot.sound` and `Classical.choice` only.
 
-The kernel evaluates the timing model in about three minutes.  Three
-choices make that possible: costs are combined by a writer monad along the
-program's structure (`WeftChals/Circuit/Writer.lean`), never threaded
-through the gates; counting a gate forces its ready time (`after`,
-`WeftChals/Circuit/Instances.lean`), so the times are computed in circuit
-order rather than by a lazy read of the outputs, which nests `max` as deep
-as the circuit; and the latest output time is a structural fold
-(`maxTime`, `WeftChals/Realization/Cost.lean`).
+The timing proof checks each schedule step and compression round separately.
+Compiled evaluation proposes concrete arrival times and a local AND count;
+the kernel checks every proposal against the original timing model before
+composition lemmas combine the results. The next step starts from those
+concrete times, so the kernel does not repeatedly expand earlier rounds.
+The final proof computes the maximum of the eight output words' ready times.
+This introduces no compiler-trust axiom. The checkpoint representation,
+composition lemmas, and evaluator live in `WeftChals/Timing/`.
+
+On the development machine (Lean 4.29.0, macOS arm64), rechecking
+`Numbers.lean` still takes about three minutes. The checkpoint proof stays
+around 3.5 GB of resident memory, compared with roughly 30 GB observed
+during the original whole-circuit reduction. It uses the default heartbeat
+and recursion-depth limits. These measurements establish a memory
+improvement, not a significant runtime improvement.
 
 ## Building
+
+See [LEAN_STYLE.md](LEAN_STYLE.md) for the proof structure, trust assumptions,
+profiling workflow, and memory budget.
 
 ```
 lake exe cache get

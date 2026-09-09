@@ -1,5 +1,6 @@
 import WeftChals.Realization.Cost
 import WeftChals.Plans.Compression
+import WeftChals.Timing.Eval
 
 /-!
 # The numbers
@@ -18,14 +19,15 @@ abbrev plan : BlockPlan := Plans.Compression.plan
 /-- Inputs available at round 0. -/
 def zeroTimes {k : Nat} : Fin k → Wd Nat := fun _ _ => 0
 
-set_option maxHeartbeats 0 in
-set_option maxRecDepth 100000 in
+/- Check each schedule step and round independently, then compose the equalities. -/
+time_model_result timeModel_checkpoint := plan zeroTimes zeroTimes
+
 /-- **The numbers, by the kernel**: 38656 ANDs, and the output ready at
-round 456.  One evaluation of the timing model by the kernel (a few
-minutes; the count first, which forces every gate's ready time in circuit
-order, then the latest output time). -/
+round 456. The checkpoint theorem supplies the concrete output times and
+count; only the final arithmetic remains. -/
 theorem timeModel_numbers :
     (timeModel plan zeroTimes zeroTimes).2 = 38656 ∧ maxTime (timeModel plan zeroTimes zeroTimes).1 = 456 := by
+  rw [timeModel_checkpoint]
   decide +kernel
 
 /-- **Communication**: 38656 ANDs. -/
