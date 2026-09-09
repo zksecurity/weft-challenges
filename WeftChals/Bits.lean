@@ -24,6 +24,9 @@ def toNatAux : (n : Nat) → (Fin n → GF2) → Nat
 /-- The number a word denotes. -/
 def toNat (w : Word32) : Nat := toNatAux 32 w
 
+/-- The word as a fixed-width integer. -/
+def toUInt32 (w : Word32) : UInt32 := (toNat w).toUInt32
+
 /-- The word of a number (its 32 low bits). -/
 def ofNat (n : Nat) : Word32 := bitsOf 32 n
 

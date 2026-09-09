@@ -135,7 +135,7 @@ theorem getP (c : Ctx S₁) (e : Env S₁) (a b : Nat) :
 
 theorem prod (c : Ctx S₁) (e : Env S₁) (code : Nat) :
     ρ.R (Env.map f) (Adder.prod c e code) (Adder.prod (c.map f) (e.map f) code) := by
-  simp only [Adder.prod, Ctx.map_pos]
+  dsimp only [Adder.prod, Ctx.map]
   split
   · split
     · split

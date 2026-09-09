@@ -1,7 +1,7 @@
 # Lean Style Guide
 
-Adapted from `golf/LEAN_STYLE.md` for this project's Weft programs,
-functionalities, realisations, and cost proofs.
+Conventions for this project’s Weft programs, functionalities, realisations,
+and cost proofs.
 
 ## 1. Kernel-checked proofs
 
@@ -32,7 +32,7 @@ Follow the existing separation of specifications, programs, and proofs:
 
 ```text
 WeftChals/
-  Spec/             -- reference specifications
+  Spec/             -- word helpers and adapters for Wychelean
   Functionality/    -- ideal interfaces and models
   Circuit/          -- generic gadgets, plans, instances, relation lemmas
   Sem/              -- functional correctness of the generic gadgets

@@ -6,7 +6,7 @@ import WeftChals.Sem.Compress
 # The compression function, realised
 
 Over `Hyb`, the program is the compression circuit with the word
-operations as black boxes; its output is `compressBlock` and its view is
+operations as black boxes; its output is Wychelean’s `compress` and its view is
 a fixed list, so the simulator replays it.  Composing with the word
 realisations gives the compression function over Boolean circuits, with
 correctness and perfect privacy by weft's composition theorem.
@@ -23,7 +23,7 @@ def compressView (plan : BlockPlan) : List (Event Hyb.ops) :=
 
 theorem compress_output (plan : BlockPlan) (H : Fin 8 → Word32) (block : Fin 16 → Word32) :
     output Hyb.eval (Compress.compress (m := Prog Hyb.ops .ideal) plan H block)
-      = wordsBits (Specs.SHA256.compressBlock (wordsNat H) (wordsNat block)) := by
+      = wordsOfUInt32 (SHA256.compressWords (wordsUInt32 H) (wordsUInt32 block)) := by
   have e : output Hyb.eval (Compress.compress (m := Prog Hyb.ops .ideal) plan H block)
       = Compress.compress (m := Id) plan H block := Hyb.valRel.compress plan H block
   rw [e]

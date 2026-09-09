@@ -87,7 +87,7 @@ instance : WordM Option GF2 where
   add := addReal
   sum := sumReal
 
-def iv : Fin 8 → Word32 := wordsBits Specs.SHA256.H0
+def iv : Fin 8 → Word32 := wordsOfUInt32 (SHA256.stateWords Wychelean.Hashes.SHA256.H0)
 
 /-- The padded block of `"abc"`. -/
 def abcBlock : Fin 16 → Word32 := fun j =>
@@ -102,6 +102,21 @@ example : (Compress.compress (m := Option) Plans.Compression.plan iv abcBlock).m
 
 /-- So does the fallback structure of the empty plan. -/
 example : (Compress.compress (m := Option) ⟨[], [], []⟩ iv abcBlock).map wordsNat = some abcDigest := by
+  native_decide
+
+/-- A non-IV state and a block with all bit positions exercised. -/
+private def arbitraryState : Fin 8 → Word32 := fun i =>
+  Word32.ofNat (0xfedcba98 + i.val * 0x1020304)
+
+private def arbitraryBlock : Fin 16 → Word32 := fun i =>
+  Word32.ofNat (0x89abcdef + i.val * 0x1234567)
+
+example : (Compress.compress (m := Option) Plans.Compression.plan arbitraryState arbitraryBlock).map wordsUInt32 =
+    some (SHA256.compressWords (wordsUInt32 arbitraryState) (wordsUInt32 arbitraryBlock)) := by
+  native_decide
+
+example : (Compress.compress (m := Option) ⟨[], [], []⟩ arbitraryState arbitraryBlock).map wordsUInt32 =
+    some (SHA256.compressWords (wordsUInt32 arbitraryState) (wordsUInt32 arbitraryBlock)) := by
   native_decide
 
 end WeftChals.Tests

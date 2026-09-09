@@ -53,7 +53,7 @@ theorem compress_rounds (H : Fin 8 → Word32) (block : Fin 16 → Word32) :
   rw [request, compress_readyOn, timesOf_request, timesOf_request, timeModel_ready]
 
 /-- **Correctness and perfect privacy** are the realisation itself: its
-output is `compressBlock`, its view is simulated from the (silent) event. -/
+output is Wychelean’s `compress`, its view is simulated from the (silent) event. -/
 noncomputable abbrev theCircuit : Realization SHA256Compress Bool2 := compressOverBool2 plan
 
 theorem theCircuit_real (r : Req SHA256Compress.ops .ideal) :

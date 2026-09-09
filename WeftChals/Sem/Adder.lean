@@ -137,7 +137,7 @@ theorem leafG_val {e : Env GF2} (he : Inv x y e) (k : Nat) (hk : k < n) :
   cases hf : Env.find e (true, k, k) with
   | some w =>
     obtain ⟨_, _, hw⟩ := find_spec x y he hf
-    simp only [if_true, Nat.sub_self] at hw
+    simp only [ite_true, Nat.sub_self] at hw
     exact ⟨hw, he⟩
   | none =>
     simp only [Id.run_bind', Id.run_pure']
@@ -211,7 +211,7 @@ theorem getG_val {e : Env GF2} (he : Inv x y e) (a b : Nat) (hab : a ≤ b) (hb 
   · cases hf : Env.find e (true, a, b) with
     | some w =>
       obtain ⟨_, _, hw⟩ := find_spec x y he hf
-      simp only [if_true] at hw
+      simp only [ite_true] at hw
       exact ⟨hw, he⟩
     | none => exact rippleG_val he a b hab hb
 
@@ -225,7 +225,7 @@ theorem getP_val {e : Env GF2} (he : Inv x y e) (a b : Nat) (hab : a ≤ b) (hb 
   · cases hf : Env.find e (false, a, b) with
     | some w =>
       obtain ⟨_, _, hw⟩ := find_spec x y he hf
-      rw [if_neg (by decide)] at hw
+      rw [ite_eq_right (by decide)] at hw
       exact hw
     | none => exact rippleP_val a b hab hb
 
@@ -244,7 +244,7 @@ theorem prod_inv {e : Env GF2} (he : Inv x y e) (code : Nat) :
         simp only [Id.run_bind', Id.run_pure']
         obtain ⟨hlo, hinv⟩ := getG_val he _ _ ham (by omega)
         refine Inv_cons x y hinv (by omega) hbn ?_
-        rw [if_pos rfl, Bit.val_maj3, bit_x x y _ hbn, bit_y x y _ hbn, hlo,
+        rw [ite_eq_left rfl, Bit.val_maj3, bit_x x y _ hbn, bit_y x y _ hbn, hlo,
           show d.b - d.a = (d.m - d.a) + 1 by omega, G]
         rw [show p0 + d.a + (d.m - d.a) + 1 = p0 + d.b by omega]
         rfl
@@ -254,7 +254,7 @@ theorem prod_inv {e : Env GF2} (he : Inv x y e) (code : Nat) :
         have hphi := getP_val hinv1 (d.m + 1) d.b (by omega) hbn
         obtain ⟨hlo, hinv2⟩ := getG_val hinv1 d.a d.m ham (by omega)
         refine Inv_cons x y hinv2 (by omega) hbn ?_
-        rw [if_pos rfl, Bit.val_xor, Bit.val_and, hhi, hphi, hlo]
+        rw [ite_eq_left rfl, Bit.val_xor, Bit.val_and, hhi, hphi, hlo]
         have := G_split x.val y.val (p0 + d.a) (d.m - d.a) (d.b - (d.m + 1))
         rw [show d.m - d.a + (d.b - (d.m + 1)) + 1 = d.b - d.a by omega,
           show p0 + d.a + (d.m - d.a) + 1 = p0 + (d.m + 1) by omega] at this
@@ -263,7 +263,7 @@ theorem prod_inv {e : Env GF2} (he : Inv x y e) (code : Nat) :
       have hphi := getP_val he (d.m + 1) d.b (by omega) hbn
       have hplo := getP_val he d.a d.m ham (by omega)
       refine Inv_cons x y he (by omega) hbn ?_
-      rw [if_neg Bool.false_ne_true, Bit.val_and, hphi, hplo]
+      rw [ite_eq_right Bool.false_ne_true, Bit.val_and, hphi, hplo]
       have := P_split x.val y.val (p0 + d.a) (d.m - d.a) (d.b - (d.m + 1))
       rw [show d.m - d.a + (d.b - (d.m + 1)) + 1 = d.b - d.a by omega,
         show p0 + d.a + (d.m - d.a) + 1 = p0 + (d.m + 1) by omega] at this

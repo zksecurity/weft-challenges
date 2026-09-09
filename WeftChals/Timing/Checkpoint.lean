@@ -60,7 +60,9 @@ def decode {α : Type} [Snapshot α] (x : Nat × List (List Nat)) : Count α :=
 theorem encode_injective {α : Type} [Snapshot α] {x y : Count α}
     (h : encode x = encode y) : x = y := by
   have := congrArg (decode (α := α)) h
-  simpa [decode, encode, Snapshot.decode_encode] using this
+  apply Prod.ext
+  · simpa [decode, encode, Snapshot.decode_encode] using congrArg (fun v : Count α => v.1) this
+  · simpa [decode, encode] using congrArg (fun v : Count α => v.2) this
 
 theorem fold_nil {α β : Type} (f : β → α → Count β) (s : β) :
     foldM f s [] = (s, 0) := rfl
@@ -69,7 +71,9 @@ theorem fold_cons {α β : Type} (f : β → α → Count β) (s t u : β)
     (a : α) (as : List α) (c d : Nat)
     (head : f s a = (t, c)) (tail : foldM f t as = (u, d)) :
     foldM f s (a :: as) = (u, c + d) := by
-  simp only [foldM, head, Writer.bind_eq, Writer.bind, tail, Acc.nat_app]
+  change Writer.bind (f s a) (fun t => foldM f t as) = _
+  simp only [head, Writer.bind, tail, Acc.nat_app]
+  rfl
 
 def initial (H : Fin 8 → Wd Nat) : Compress.State Nat :=
   ⟨H 0, H 1, H 2, H 3, H 4, H 5, H 6, H 7⟩
@@ -94,5 +98,6 @@ theorem compose (plan : BlockPlan) (H : Fin 8 → Wd Nat) (block : Fin 16 → Wd
       Writer.bind (foldM Compress.round (initial H)
         (List.zip Compress.kList (List.zip W (Compress.roundPlans plan)))) (finish plan H))) = _
   simp only [hz, Writer.bind, hw, hs, ho, Acc.nat_app]
+  rfl
 
 end WeftChals.Timing

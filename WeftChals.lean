@@ -1,5 +1,4 @@
 import WeftChals.Spec.Bitwise
-import WeftChals.Spec.Vector
 import WeftChals.Spec.SHA256
 import WeftChals.Bits
 import WeftChals.Circuit.Plan
@@ -21,6 +20,7 @@ import WeftChals.Functionality.Word
 import WeftChals.Functionality.Compress
 import WeftChals.Sem.Value
 import WeftChals.Sem.Bits
+import WeftChals.Sem.UInt32
 import WeftChals.Sem.Adder
 import WeftChals.Sem.Word
 import WeftChals.Sem.Compress

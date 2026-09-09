@@ -61,7 +61,7 @@ theorem ofBool_and' (a b : Bool) : GF2.ofBool (a && b) = GF2.ofBool a * GF2.ofBo
   cases x with
   | const a =>
     cases y with
-    | const b => simp [Bit.xor, GF2.ofBool_xor]
+    | const b => simp [Id.run, Bit.xor, GF2.ofBool_xor]
     | var t =>
       cases a
       · show t = 0 + t
@@ -81,11 +81,11 @@ theorem ofBool_and' (a b : Bool) : GF2.ofBool (a && b) = GF2.ofBool a * GF2.ofBo
   cases x with
   | const a =>
     cases y with
-    | const b => simp [Bit.and, GF2.ofBool_and]
-    | var t => cases a <;> simp [Bit.and]
+    | const b => simp [Id.run, Bit.and, GF2.ofBool_and]
+    | var t => cases a <;> simp [Id.run, Bit.and]
   | var s =>
     cases y with
-    | const b => cases b <;> simp [Bit.and]
+    | const b => cases b <;> simp [Id.run, Bit.and]
     | var t => rfl
 
 theorem val_ch3 (x y z : Bit GF2) :
@@ -113,14 +113,14 @@ theorem val_maj3 (x y z : Bit GF2) :
         simp only [Bit.maj3]
         split
         · subst_vars; cases b <;> (revert s; decide)
-        · cases a <;> cases b <;> simp_all
+        · cases a <;> cases b <;> simp_all [Id.run]
     | var s =>
       cases z with
       | const c =>
         simp only [Bit.maj3]
         split
         · subst_vars; cases c <;> (revert s; decide)
-        · cases a <;> cases c <;> simp_all
+        · cases a <;> cases c <;> simp_all [Id.run]
       | var t => exact generic _ _ _
   | var s =>
     cases y with
@@ -130,7 +130,7 @@ theorem val_maj3 (x y z : Bit GF2) :
         simp only [Bit.maj3]
         split
         · subst_vars; cases c <;> (revert s; decide)
-        · cases b <;> cases c <;> simp_all
+        · cases b <;> cases c <;> simp_all [Id.run]
       | var t => exact generic _ _ _
     | var t => exact generic _ _ _
 
